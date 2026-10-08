@@ -1,0 +1,17 @@
+{
+  "name": "local-first-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-first collaborative workspace: TipTap + Yjs + Hocuspocus + Prisma",
+  "workspaces": ["server", "client"],
+  "scripts": {
+    "setup": "npm install && npm run db:push -w server",
+    "dev": "concurrently -n server,client -c cyan,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "db:push": "npm run db:push -w server",
+    "db:studio": "npm run db:studio -w server",
+    "test:merge": "npm run test:merge -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Default: SQLite (zero setup). For PostgreSQL change provider to "postgresql"
+// and set DATABASE_URL="postgresql://user:pass@localhost:5432/workspace"
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String            @id @default(uuid())
+  email       String            @unique
+  name        String?
+  avatarUrl   String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  memberships WorkspaceMember[]
+  documents   Document[]        @relation("CreatedDocuments")
+}
+
+model Workspace {
+  id        String            @id @default(uuid())
+  name      String
+  slug      String            @unique
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  members   WorkspaceMember[]
+  documents Document[]
+}
+
+// role is one of: OWNER | ADMIN | MEMBER | VIEWER
+// (stored as String so the same schema works on SQLite and PostgreSQL;
+//  on PostgreSQL you may switch this to a native enum)
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  role        String    @default("MEMBER")
+  userId      String
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+model Document {
+  id          String           @id @default(uuid())
+  title       String           @default("Untitled")
+  workspaceId String
+  creatorId   String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator     User             @relation("CreatedDocuments", fields: [creatorId], references: [id])
+  updates     DocumentUpdate[]
+
+  @@index([workspaceId])
+}
+
+// Stores the CRDT binary state for server persistence and restoration
+model DocumentUpdate {
+  id         String   @id @default(uuid())
+  documentId String
+  update     Bytes
+  createdAt  DateTime @default(now())
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+}
