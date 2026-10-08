@@ -1,6 +1,7 @@
 # Local-First Collaborative Workspace
 
 Real-time collaborative rich-text documents that keep working offline and merge automatically when you reconnect.
+App is live at: https://local-first-workspace.vercel.app/
 
 **Stack:** Next.js 14 · TipTap · Yjs (CRDT) · y-indexeddb · Hocuspocus (WebSocket sync) · Express · Prisma (SQLite by default, PostgreSQL optional)
 
